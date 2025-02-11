@@ -12,39 +12,60 @@
 
 #include "philo.h"
 
-int	ft_atoi(const char *str)
+int	check_args(int argc, char **argv)
 {
-	int	i;
-	int	sign;
-	int	result;
+	long	value;
+	int		i;
+	int		j;
 
-	result = 0;
-	i = 0;
-	sign = 1;
-	while ((str[i] >= 9 && str[i] <= 13) || str[i] == ' ')
-		i++;
-	if (str[i] == '-' || str[i] == '+')
+	if (ft_strlen(*argv) == 0 || ft_strlen(*argv) > 10)
+		return (0);
+	i = 1;
+	while (i < argc)
 	{
-		if (str[i] == '-')
-			sign *= -1;
+		j = 0;
+		while (argv[i][j])
+		{
+			if (argv[i][j] < '0' || argv[i][j] > '9')
+				return (0);
+			j++;
+		}
+		value = ft_atol(argv[i]);
+		if (value > INT_MAX || value < 0)
+			return (0);
 		i++;
 	}
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		result = (result * 10) + str[i] - '0';
-		i++;
-	}
-	return (result * sign);
+	return (1);
+}
+
+t_data	*init_struct(int argc, char **argv)
+{
+	t_data	*data;
+
+	data = malloc(sizeof(t_data));
+	if (!data)
+		return (NULL);
+	data->nb_philo = ft_atoi(argv[1]);
+	data->tt_die = ft_atoi(argv[2]);
+	data->tt_eat = ft_atoi(argv[3]);
+	data->tt_sleep = ft_atoi(argv[4]);
+	if (argc == 6)
+		data->must_eaten = ft_atoi(argv[5]);
+	else
+		data->must_eaten = -1;
+	data->dead = 0;
+	return(data);
 }
 
 int	main(int argc, char **argv)
 {
-	t_data	data;
-	data.nb_philo = ft_atoi(argv[1]);
-	data.tt_die = ft_atoi(argv[2]);
-	data.tt_eat = ft_atoi(argv[3]);
-	if (argc == 4)
-		data.nb_time_philo_eaten = ft_atoi(argv[4]);
+	t_data	*data;
 
+	if (!check_args(argc, argv))
+		return (1);
+	data = init_struct(argc, argv);
+	if (!data)
+		return (1);
+	free(data);
 	return (0);
 }

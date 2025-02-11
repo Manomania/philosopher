@@ -13,37 +13,50 @@
 #ifndef PHILO_H
 # define PHILO_H
 
-# include <stdlib.h>
-# include <stdio.h>
-# include <unistd.h>
+# include <limits.h>
 # include <pthread.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
 # include <sys/time.h>
 
-typedef struct	s_timeval
-{
-	time_t		tv_sec;
-	suseconds_t	tv_usec;
-}				t_timeval;
+# define RESET	"\033[039m"
+# define RED	"\033[091m"
+# define GREEN	"\033[092m"
+# define YELLOW	"\033[093m"
 
-typedef struct	s_philo
-{
-	int	id;
-	int	l_fork;
-	int	r_fork;
-	int	start_eat;
-}		t_philo;
+typedef struct s_philo	t_philo;
+typedef struct s_data	t_data;
+typedef struct timeval	t_timeval;
 
 typedef struct s_data
 {
-	long	time_start;
-	int		nb_philo;
-	int		tt_die;
-	int		tt_eat;
-	int		tt_sleep;
-	int		must_eaten;
-	int		finished;
-}		t_data;
+	pthread_mutex_t	*forks_lock;
+	pthread_mutex_t	death_lock;
+	pthread_mutex_t	print_lock;
+	t_philo			*philo;
+	long			time_start;
+	int				nb_philo;
+	int				tt_die;
+	int				tt_eat;
+	int				tt_sleep;
+	int				must_eaten;
+	int				dead;
+}					t_data;
 
+typedef struct s_philo
+{
+	pthread_t		thread;
+	pthread_mutex_t	meal_lock;
+	struct s_data	*data;
+	long			last_meal_time;
+	int				meals_eaten;
+	int				id;
+}					t_philo;
 
+// utils.c
+int		ft_atoi(const char *str);
+long	ft_atol(const char *str);
+size_t	ft_strlen(char *str);
 
 #endif

@@ -1,5 +1,5 @@
-./philo [number_of_philosophers] [time_to_die] [time_to_eat time_to_sleep] [number_of_times_each_philosopher_must_eat]
-./philo argv[1]                  argv[2]       argv[3]                     argv[4]
+./philo [number_of_philosophers] [time_to_die] [time_to_eat] [time_to_sleep] [number_of_times_each_philosopher_must_eat]
+./philo argv[1]                  argv[2]       argv[3]       argv[4]         argv[5]
 
 memset
 printf
@@ -47,3 +47,7 @@ side. If there is only one philosopher, there should be only one fork on the tab
 •   To prevent philosophers from duplicating forks, you should protect the forks state
 with a mutex for each of them.
 
+
+
+Left fork = philosopher_id
+Right fork = (philosopher_id + 1) % number_of_philosophers

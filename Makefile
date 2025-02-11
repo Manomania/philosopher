@@ -10,7 +10,10 @@ CFLAGS 				= 	-Wall -Wextra -Werror
 AR					=	ar rcs
 RM					=	rm -f
 
-SRC_F				=	main
+SRC_F				=	main \
+						mutex \
+						utils \
+						threads
 SRC					=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_F)))
 OBJ 				= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_F)))
 
@@ -25,6 +28,12 @@ INC_DIR				=	include/
 ########################################################################################################################
 #                                                       TARGETS                                                        #
 ########################################################################################################################
+
+.print_header:
+							$(call DISPLAY_TITLE)
+							$(call SEPARATOR)
+							$(call BUILD)
+							$(call SEPARATOR)
 
 all:					.print_header $(NAME)
 
@@ -41,12 +50,6 @@ fclean: 				clean
 							$(call SEPARATOR)
 
 re: 					.print_header fclean all
-
-.print_header:
-							$(call DISPLAY_TITLE)
-							$(call SEPARATOR)
-							$(call BUILD)
-							$(call SEPARATOR)
 
 .PHONY: 				all clean fclean re
 
