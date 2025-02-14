@@ -13,7 +13,7 @@ RM					=	rm -f
 SRC_F				=	main \
 						mutex \
 						utils \
-						threads
+						init
 SRC					=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_F)))
 OBJ 				= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_F)))
 
@@ -92,7 +92,7 @@ SLEEP_FRAME			=	0.001
 
 SRCS_TO_COMPILE		=	$(shell find $(SRC_DIR) -type f -name "*.c" -newer $(NAME) 2>/dev/null | wc -l)
 ifeq ($(SRCS_TO_COMPILE),0)
-	SRCS_TO_COMPILE =	$(words $(SRC_F))
+	SRCS_TO_COMPILE =	$(shell find $(SRC_DIR) -type f -name "*.c" 2>/dev/null | wc -l)
 endif
 
 define PROGRESS_BAR_PERCENTAGE
@@ -117,8 +117,7 @@ define	DISPLAY_TITLE
 						@echo "$(YELLOW)			  / /_/ / __ \\/ / / __ \\"
 						@echo "$(GREEN)			 / ____/ / / / / / /_/ /"
 						@echo "$(BLUE)			/_/   /_/ /_/_/_/\\____/ "
-						@echo "$(PURPLE)			                        $(DEF_COLOR)"
-						@printf "\n"
+						@printf "$(PURPLE)			                        $(DEF_COLOR)"
 endef
 
 define	SEPARATOR

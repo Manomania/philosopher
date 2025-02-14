@@ -50,8 +50,10 @@ typedef struct s_philo
 	pthread_mutex_t	meal_lock;
 	struct s_data	*data;
 	long			last_meal_time;
-	int				meals_eaten;
 	int				id;
+	int				lfork;
+	int				rfork;
+	int				meals_eaten;
 }					t_philo;
 
 // utils.c
@@ -59,4 +61,6 @@ int		ft_atoi(const char *str);
 long	ft_atol(const char *str);
 size_t	ft_strlen(char *str);
 
+// init.c
+int	init_values(t_data *data);
 #endif

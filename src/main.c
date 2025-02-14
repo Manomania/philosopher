@@ -27,15 +27,21 @@ int	check_args(int argc, char **argv)
 		while (argv[i][j])
 		{
 			if (argv[i][j] < '0' || argv[i][j] > '9')
-				return (0);
+			{
+				printf(RED"Error:\nYour values must be numeric only\n"RESET);
+				return (1);
+			}
 			j++;
 		}
 		value = ft_atol(argv[i]);
 		if (value > INT_MAX || value < 0)
-			return (0);
+		{
+			printf(RED"Error:\nYour value is higher than a INT\n"RESET);
+			return (1);
+		}
 		i++;
 	}
-	return (1);
+	return (0);
 }
 
 t_data	*init_struct(int argc, char **argv)
@@ -57,15 +63,44 @@ t_data	*init_struct(int argc, char **argv)
 	return(data);
 }
 
+void	DEBUG_DATA(t_data *data)
+{
+	printf(YELLOW"DEBUG: time start %ld\n"RESET, data->time_start);
+	printf(YELLOW"DEBUG: nb_philo %d\n"RESET, data->nb_philo);
+	printf(YELLOW"DEBUG: tt_die %d\n"RESET, data->tt_die);
+	printf(YELLOW"DEBUG: tt_eat %d\n"RESET, data->tt_eat);
+	printf(YELLOW"DEBUG: tt_sleep %d\n"RESET, data->tt_sleep);
+	printf(YELLOW"DEBUG: must_eaten %d\n"RESET, data->must_eaten);
+	printf(YELLOW"DEBUG: dead %d\n"RESET, data->dead);
+}
+
+void	DEBUG_PHILO(t_data *data)
+{
+	printf(YELLOW"DEBUG: last_meal_time %ld\n"RESET, data->philo->last_meal_time);
+	printf(YELLOW"DEBUG: meals_eaten %d\n"RESET, data->philo->meals_eaten);
+	for (int i = 0; i < data->nb_philo; i++)
+		printf(YELLOW"DEBUG: id %d\n"RESET, data->philo->thread[i]);
+}
+
 int	main(int argc, char **argv)
 {
 	t_data	*data;
 
-	if (!check_args(argc, argv))
+	if (check_args(argc, argv))
 		return (1);
+	if (!(argc == 5 || argc == 6))
+	{
+		printf(RED"Error:\nUsage : ./philo [number_of_philosophers] [time_to_die]"
+			" [time_to_eat] [time_to_sleep]"
+			" [# number_of_times_each_philosopher_must_eat]\n"RESET);
+		return (1);
+	}
 	data = init_struct(argc, argv);
 	if (!data)
 		return (1);
+	DEBUG_DATA(data);
+	init_values(data);
+	DEBUG_PHILO(data);
 	free(data);
 	return (0);
 }
