@@ -20,8 +20,8 @@ static int	init_philo(t_data *data)
 	while (i < data->nb_philo)
 	{
 		data->philo[i].id = i + 1;
-		data->philo[i].lfork = data->philo[i].id;
-		data->philo[i].rfork = (data->philo[i].id + 1) % data->nb_philo;
+		data->philo[i].forks[0] = data->philo[i].id;
+		data->philo[i].forks[1] = (data->philo[i].id + 1) % data->nb_philo;
 		data->philo[i].meals_eaten = 0;
 		data->philo[i].last_meal_time = 0;
 		data->philo[i].data = data;
@@ -75,3 +75,20 @@ int	init_values(t_data *data)
 	return (0);
 }
 
+int	init_pthread_philo(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	data->time_start = ft_time();
+	while (i < data->nb_philo)
+	{
+		init_philo(data);
+		data->philo[i].last_meal_time = ft_time();
+		if (pthread_create(&data->philo[i].thread, NULL, routine, &data->philo[i]))
+		 	return (1);
+		i++;
+	}
+
+	return (0);
+}

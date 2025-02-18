@@ -59,6 +59,11 @@ t_data	*init_struct(int argc, char **argv)
 		data->must_eaten = ft_atoi(argv[5]);
 	else
 		data->must_eaten = -1;
+	if (data->nb_philo <= 0 || data->tt_die <= 0 || data->tt_eat <= 0 || data->tt_sleep <= 0)
+	{
+		free(data);
+		return (NULL);
+	}
 	data->dead = 0;
 	return(data);
 }
@@ -76,10 +81,10 @@ void	DEBUG_DATA(t_data *data)
 
 void	DEBUG_PHILO(t_data *data)
 {
-	printf(YELLOW"DEBUG: last_meal_time %ld\n"RESET, data->philo->last_meal_time);
+	printf(YELLOW"\nDEBUG: last_meal_time %ld\n"RESET, data->philo->last_meal_time);
 	printf(YELLOW"DEBUG: meals_eaten %d\n"RESET, data->philo->meals_eaten);
 	for (int i = 0; i < data->nb_philo; i++)
-		printf(YELLOW"DEBUG: id %d\n"RESET, data->philo->thread[i]);
+		printf(YELLOW"DEBUG: ID %p\n"RESET, &data->philo[i].thread);
 }
 
 int	main(int argc, char **argv)
@@ -97,7 +102,10 @@ int	main(int argc, char **argv)
 	}
 	data = init_struct(argc, argv);
 	if (!data)
+	{
+		printf(RED"Error:\n Wrong arguments\n"RESET);
 		return (1);
+	}
 	DEBUG_DATA(data);
 	init_values(data);
 	DEBUG_PHILO(data);

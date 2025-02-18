@@ -73,3 +73,13 @@ size_t	ft_strlen(char *str)
 		i++;
 	return (i);
 }
+
+unsigned long	ft_time(void)
+{
+	t_timeval		timeval;
+	unsigned long	time;
+
+	gettimeofday(&timeval, NULL);
+	time = (timeval.tv_sec * 1000) + (timeval.tv_usec / 1000);
+	return (time);
+}

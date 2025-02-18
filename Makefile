@@ -13,7 +13,8 @@ RM					=	rm -f
 SRC_F				=	main \
 						mutex \
 						utils \
-						init
+						init \
+						threads
 SRC					=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_F)))
 OBJ 				= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_F)))
 
