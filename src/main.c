@@ -103,12 +103,15 @@ int	main(int argc, char **argv)
 	data = init_struct(argc, argv);
 	if (!data)
 	{
-		printf(RED"Error:\n Wrong arguments\n"RESET);
+		printf(RED"Error:\nWrong arguments\n"RESET);
 		return (1);
 	}
-	DEBUG_DATA(data);
+	// DEBUG_DATA(data);
 	init_values(data);
-	DEBUG_PHILO(data);
-	free(data);
+	init_pthread_philo(data);
+	// DEBUG_PHILO(data);
+	// free(data->forks_lock);
+	// free(data->philo);
+	// free(data);
 	return (0);
 }

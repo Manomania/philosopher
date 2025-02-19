@@ -19,7 +19,7 @@ static int	init_philo(t_data *data)
 	i = 0;
 	while (i < data->nb_philo)
 	{
-		data->philo[i].id = i + 1;
+		data->philo[i].id = i;
 		data->philo[i].forks[0] = data->philo[i].id;
 		data->philo[i].forks[1] = (data->philo[i].id + 1) % data->nb_philo;
 		data->philo[i].meals_eaten = 0;
@@ -43,7 +43,7 @@ static int	init_mutex(t_data *data)
 			return (1);
 		i++;
 	}
-	if (pthread_mutex_init(&data->philo->meal_lock, NULL))
+	if (pthread_mutex_init(&data->meal_lock, NULL))
 		return (1);
 	if (pthread_mutex_init(&data->print_lock, NULL))
 		return (1);
@@ -89,6 +89,15 @@ int	init_pthread_philo(t_data *data)
 		 	return (1);
 		i++;
 	}
-
+	i = 0;
+	while (i < data->nb_philo)
+	{
+		if (pthread_join(data->philo[i].thread, NULL))
+		{
+			printf(RED"DEBUG: Cant pthread_join"RESET);
+			exit(1);
+		}
+		i++;
+	}
 	return (0);
 }

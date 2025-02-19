@@ -48,6 +48,7 @@ typedef struct s_data
 	pthread_mutex_t	*forks_lock;
 	pthread_mutex_t	death_lock;
 	pthread_mutex_t	print_lock;
+	pthread_mutex_t	meal_lock;
 	t_philo			*philo;
 	unsigned long	time_start;
 	int				nb_philo;
@@ -55,13 +56,13 @@ typedef struct s_data
 	int				tt_eat;
 	int				tt_sleep;
 	int				must_eaten;
+	int				full;
 	int				dead;
 }					t_data;
 
 typedef struct s_philo
 {
 	pthread_t		thread;
-	pthread_mutex_t	meal_lock;
 	struct s_data	*data;
 	unsigned long	last_meal_time;
 	int				id;
