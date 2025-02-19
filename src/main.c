@@ -106,12 +106,16 @@ int	main(int argc, char **argv)
 		printf(RED"Error:\nWrong arguments\n"RESET);
 		return (1);
 	}
-	// DEBUG_DATA(data);
-	init_values(data);
-	init_pthread_philo(data);
-	// DEBUG_PHILO(data);
-	// free(data->forks_lock);
-	// free(data->philo);
-	// free(data);
+	if (init_values(data))
+	{
+		free_ressources(data);
+		return (1);
+	}
+	if (init_pthread_philo(data))
+	{
+		free_ressources(data);
+		return (1);
+	}
+	free_ressources(data);
 	return (0);
 }

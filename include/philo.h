@@ -87,10 +87,12 @@ size_t			ft_strlen(char *str);
 unsigned long	ft_time(void);
 
 // init.c
-int	init_values(t_data *data);
-int	init_pthread_philo(t_data *data);
+int				init_values(t_data *data);
+int				init_pthread_philo(t_data *data);
 
 // threads.c
-void	*routine(void *arg);
+void			*routine(void *arg);
+int				philo_dead(t_data *data);
+void			free_ressources(t_data *data);
 
 #endif

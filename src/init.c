@@ -93,10 +93,7 @@ int	init_pthread_philo(t_data *data)
 	while (i < data->nb_philo)
 	{
 		if (pthread_join(data->philo[i].thread, NULL))
-		{
-			printf(RED"DEBUG: Cant pthread_join"RESET);
-			exit(1);
-		}
+			return (1);
 		i++;
 	}
 	return (0);

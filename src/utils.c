@@ -76,10 +76,15 @@ size_t	ft_strlen(char *str)
 
 unsigned long	ft_time(void)
 {
+	static t_timeval start = {0,0};
 	t_timeval		timeval;
-	unsigned long	time;
 
-	gettimeofday(&timeval, NULL);
-	time = (timeval.tv_sec * 1000) + (timeval.tv_usec / 1000);
-	return (time);
+	if (start.tv_sec == 0 && start.tv_usec == 0)
+		gettimeofday(&start, NULL);
+	else
+	{
+		gettimeofday(&timeval, NULL);
+		return (((timeval.tv_sec * 1000) + (timeval.tv_usec / 1000)) - ((start.tv_sec * 1000) + (start.tv_usec / 1000)));
+	}
+	return(0);
 }
