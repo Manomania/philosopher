@@ -64,7 +64,8 @@ t_data	*init_struct(int argc, char **argv)
 		free(data);
 		return (NULL);
 	}
-	data->dead = 0;
+	data->status = ALIVE;
+	data->full = 0;
 	return(data);
 }
 
@@ -76,7 +77,7 @@ void	DEBUG_DATA(t_data *data)
 	printf(YELLOW"DEBUG: tt_eat %d\n"RESET, data->tt_eat);
 	printf(YELLOW"DEBUG: tt_sleep %d\n"RESET, data->tt_sleep);
 	printf(YELLOW"DEBUG: must_eaten %d\n"RESET, data->must_eaten);
-	printf(YELLOW"DEBUG: dead %d\n"RESET, data->dead);
+	printf(YELLOW"DEBUG: dead %d\n"RESET, data->status);
 }
 
 void	DEBUG_PHILO(t_data *data)

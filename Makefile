@@ -10,11 +10,8 @@ CFLAGS 				= 	-Wall -Wextra -Werror
 AR					=	ar rcs
 RM					=	rm -f
 
-SRC_F				=	main \
-						mutex \
-						utils \
-						init \
-						threads
+include files.mk
+
 SRC					=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_F)))
 OBJ 				= 	$(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_F)))
 
