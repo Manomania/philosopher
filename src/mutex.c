@@ -33,12 +33,16 @@ int	handle_fork_mutex(t_philo *philo, e_hand hand, e_padlock action)
 	{
 		if (pthread_mutex_lock(&philo->data->forks_lock[philo->forks[hand]]))
 			return (1);
+		philo->available = 1;
+		printf(YELLOW"DEBUG: %d\n"RESET, philo->available);
 		philo_print(MSG_FORK, philo);
 	}
 	if (action == UNLOCK)
 	{
 		if (pthread_mutex_unlock(&philo->data->forks_lock[philo->forks[hand]]))
 			return (1);
+		philo->available = 0;
+		printf(YELLOW"DEBUG: %d\n"RESET, philo->available);
 	}
 	return (0);
 }

@@ -15,6 +15,7 @@
 
 # include <limits.h>
 # include <pthread.h>
+# include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -88,6 +89,7 @@ typedef struct s_philo
 	int				id;
 	int				meals_eaten;
 	int				forks[2];
+	bool			available;
 }					t_philo;
 
 

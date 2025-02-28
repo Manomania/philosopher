@@ -29,21 +29,14 @@ int	increase_meal(t_philo *philo)
 	return (philo->meals_eaten);
 }
 
-int	get_status(t_data *data)
+int get_status(t_data *data)
 {
+	int	status_value;
+
 	handle_mutex(&data->death_lock, LOCK);
-	if (data->status == DEAD || data->status == FULL)
-	{
-		handle_mutex(&data->death_lock, UNLOCK);
-		exit(4);
-	}
-	if (data->status == ALIVE)
-	{
-		handle_mutex(&data->death_lock, UNLOCK);
-		return (1);
-	}
+	status_value = data->status;
 	handle_mutex(&data->death_lock, UNLOCK);
-	return (1);
+	return (status_value);
 }
 
 unsigned long	set_last_meal(t_philo *philo)
@@ -54,15 +47,39 @@ unsigned long	set_last_meal(t_philo *philo)
 	return (philo->last_meal_time);
 }
 
-int	set_status(t_data *data)
+int set_status(t_data *data)
 {
+	int i;
+	unsigned long current_time;
+
+	/* Check if all philosophers are full */
 	handle_mutex(&data->full_lock, LOCK);
 	if (data->full == data->nb_philo)
+	{
 		data->status = FULL;
+		handle_mutex(&data->full_lock, UNLOCK);
+		return 1;
+	}
 	handle_mutex(&data->full_lock, UNLOCK);
-	handle_mutex(&data->death_lock, LOCK);
-	if (get_status(data) && (ft_time() - set_last_meal(data->philo)) > (unsigned long)data->tt_die)
-		data->status = DEAD;
-	handle_mutex(&data->death_lock, UNLOCK);
-	return (1);
+
+	/* Check if any philosopher has died */
+	i = 0;
+	while (i < data->nb_philo)
+	{
+		current_time = ft_time();
+		handle_mutex(&data->philo[i].meal_lock, LOCK);
+		if ((current_time - data->philo[i].last_meal_time) > (unsigned long)data->tt_die)
+		{
+			handle_mutex(&data->death_lock, LOCK);
+			data->status = DEAD;
+			handle_mutex(&data->death_lock, UNLOCK);
+			handle_mutex(&data->philo[i].meal_lock, UNLOCK);
+			philo_print(MSG_DIE, &data->philo[i]);
+			return 1;
+		}
+		handle_mutex(&data->philo[i].meal_lock, UNLOCK);
+		i++;
+	}
+
+	return 0;
 }

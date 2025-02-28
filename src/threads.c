@@ -14,59 +14,144 @@
 
 
 
-void	free_ressources(t_data *data)
+void free_ressources(t_data *data)
 {
-	int	i;
+	int i;
 
-	i = 0;
+	if (!data)
+		return;
 
+	/* Destroy all fork mutexes */
+	if (data->forks_lock)
+	{
+		for (i = 0; i < data->nb_philo; i++)
+			pthread_mutex_destroy(&data->forks_lock[i]);
+		free(data->forks_lock);
+	}
+
+	/* Destroy all meal mutexes */
+	if (data->philo)
+	{
+		for (i = 0; i < data->nb_philo; i++)
+			pthread_mutex_destroy(&data->philo[i].meal_lock);
+		free(data->philo);
+	}
+
+	/* Destroy the remaining mutexes */
 	pthread_mutex_destroy(&data->print_lock);
-	pthread_mutex_destroy(&data->philo->meal_lock);
 	pthread_mutex_destroy(&data->death_lock);
+	pthread_mutex_destroy(&data->full_lock);
 
+	free(data);
 }
 
-void	philo_print(char *msg, t_philo *philo)
+void philo_print(char *msg, t_philo *philo)
 {
-	unsigned long	current_time;
+	unsigned long current_time;
+	int status;
 
-	if (get_status(philo->data) && philo->data->full != philo->data->nb_philo)
+	/* Get status first without holding the print lock */
+	status = get_status(philo->data);
+
+	/* Only proceed if philosophers are alive and not all full */
+	if (status == ALIVE)
 	{
-		pthread_mutex_lock(&philo->data->print_lock);
-		current_time = ft_time() - philo->data->time_start;
-		printf("%ld %d %s\n", current_time, philo->id + 1, msg);
-		pthread_mutex_unlock(&philo->data->print_lock);
+		handle_mutex(&philo->data->print_lock, LOCK);
+
+		/* Check status again after acquiring the lock to ensure consistency */
+		status = get_status(philo->data);
+		if (status == ALIVE)
+		{
+			current_time = ft_time() - philo->data->time_start;
+			printf("%ld %d %s\n", current_time, philo->id + 1, msg);
+		}
+
+		handle_mutex(&philo->data->print_lock, UNLOCK);
 	}
 }
 
-void	philo_time(int duration)
+void philo_time(int duration)
 {
-	unsigned long	wake_up;
+	unsigned long start_time;
+	unsigned long current_time;
 
-	wake_up = ft_time() + duration;
-	while (ft_time() < wake_up)
+	start_time = ft_time();
+	while (1)
 	{
+		current_time = ft_time();
+		if (current_time - start_time >= (unsigned long)duration)
+			break;
 		usleep(100);
 	}
 }
-
-void	philo_eat(t_philo *philo)
+int philo_eat(t_philo *philo)
 {
-	handle_fork_mutex(philo, RIGHT, LOCK);
-	if (philo->data->nb_philo > 1)
+	if (philo->data->nb_philo == 1)
+	{
+		handle_fork_mutex(philo, RIGHT, LOCK);
+		philo_print(MSG_FORK, philo);
+		philo_time(philo->data->tt_die);
+		handle_fork_mutex(philo, RIGHT, UNLOCK);
+		return 0;
+	}
+	if (philo->id % 2 == 0)
+	{
+		handle_fork_mutex(philo, RIGHT, LOCK);
+		if (get_status(philo->data) != ALIVE)
+		{
+			handle_fork_mutex(philo, RIGHT, UNLOCK);
+			return 0;
+		}
+		handle_fork_mutex(philo, LEFT, LOCK);
+		if (get_status(philo->data) != ALIVE)
+		{
+			handle_fork_mutex(philo, RIGHT, UNLOCK);
+			handle_fork_mutex(philo, LEFT, UNLOCK);
+			return 0;
+		}
+	}
+	else
 	{
 		handle_fork_mutex(philo, LEFT, LOCK);
-		philo_print(MSG_EAT, philo);
-		increase_meal(philo);
-		set_last_meal(philo);
-		philo_time(philo->data->tt_eat);
-		increase_full(philo);
+		if (get_status(philo->data) != ALIVE)
+		{
+			handle_fork_mutex(philo, LEFT, UNLOCK);
+			return 0;
+		}
+		handle_fork_mutex(philo, RIGHT, LOCK);
+		if (get_status(philo->data) != ALIVE)
+		{
+			handle_fork_mutex(philo, LEFT, UNLOCK);
+			handle_fork_mutex(philo, RIGHT, UNLOCK);
+			return 0;
+		}
+	}
+	philo_print(MSG_EAT, philo);
+	handle_mutex(&philo->meal_lock, LOCK);
+	philo->last_meal_time = ft_time();
+	philo->meals_eaten++;
+	if (philo->data->must_eaten > 0 && philo->meals_eaten >= philo->data->must_eaten)
+	{
+		handle_mutex(&philo->data->full_lock, LOCK);
+		philo->data->full++;
+		handle_mutex(&philo->data->full_lock, UNLOCK);
+	}
+	handle_mutex(&philo->meal_lock, UNLOCK);
+	philo_time(philo->data->tt_eat);
+	if (philo->id % 2 == 0)
+	{
+		handle_fork_mutex(philo, LEFT, UNLOCK);
 		handle_fork_mutex(philo, RIGHT, UNLOCK);
 	}
-	handle_fork_mutex(philo, LEFT, UNLOCK);
+	else
+	{
+		handle_fork_mutex(philo, RIGHT, UNLOCK);
+		handle_fork_mutex(philo, LEFT, UNLOCK);
+	}
+	return 1;
 }
 
-void	*routine(void *arg)
+void *routine(void *arg)
 {
 	t_philo *philo;
 	t_data	*data;
@@ -74,20 +159,39 @@ void	*routine(void *arg)
 	philo = (t_philo *)arg;
 	data = philo->data;
 
+	/* Stagger philosopher start times to prevent deadlock */
 	if (philo->id % 2 && data->nb_philo > 1)
-		philo_time(data->tt_eat / 50);
-	while (((philo->meals_eaten < philo->data->must_eaten || philo->data->must_eaten < 0)))
-	{
-		philo_eat(philo);
-		philo_print(MSG_SLEEP, philo);
-		philo_time(data->tt_sleep);
-		philo_print(MSG_THINK, philo);
+		usleep(1000); /* Small delay to break potential symmetry */
 
-	}
-	if (philo->data->full == philo->data->nb_philo)
+	/* Set the initial last meal time */
+	handle_mutex(&philo->meal_lock, LOCK);
+	philo->last_meal_time = ft_time();
+	handle_mutex(&philo->meal_lock, UNLOCK);
+
+	/* Main philosopher cycle */
+	while (get_status(data) == ALIVE)
 	{
-		printf(GREEN"DEBUG: Philo are full\n"RESET);
-		exit(1);
+		/* Check if we've reached the required number of meals */
+		handle_mutex(&philo->meal_lock, LOCK);
+		if (data->must_eaten > 0 && philo->meals_eaten >= data->must_eaten)
+		{
+			handle_mutex(&philo->meal_lock, UNLOCK);
+			break;
+		}
+		handle_mutex(&philo->meal_lock, UNLOCK);
+
+		/* Try to eat */
+		if (philo_eat(philo) && get_status(data) == ALIVE)
+		{
+			/* Sleep phase */
+			philo_print(MSG_SLEEP, philo);
+			philo_time(data->tt_sleep);
+
+			/* Think phase */
+			if (get_status(data) == ALIVE)
+				philo_print(MSG_THINK, philo);
+		}
 	}
+
 	return (NULL);
 }
