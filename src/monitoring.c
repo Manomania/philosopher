@@ -90,7 +90,7 @@ void	*monitoring(void *arg)
 				break ;
 			i++;
 		}
-		usleep(1000);
+		usleep(500);
 	}
 	return (NULL);
 }
