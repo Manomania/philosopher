@@ -12,39 +12,51 @@
 
 #include "philo.h"
 
-int	check_args(int argc, char **argv)
+static int	check_value(int argc, char **argv)
 {
 	long	value;
+	int		i;
+
+	i = 0;
+	while (++i < argc)
+	{
+		value = ft_atol(argv[i]);
+		if (value > INT_MAX || value < 0)
+		{
+			printf(RED"Error:\nYour value is higher than "
+				"a INT or under 0\n"RESET);
+			return (1);
+		}
+	}
+	return (0);
+}
+
+static int	check_args(int argc, char **argv)
+{
 	int		i;
 	int		j;
 
 	if (ft_strlen(*argv) == 0 || ft_strlen(*argv) > 10)
 		return (0);
-	i = 1;
-	while (i < argc)
+	i = 0;
+	while (++i < argc)
 	{
 		j = 0;
 		while (argv[i][j])
 		{
 			if (argv[i][j] < '0' || argv[i][j] > '9')
 			{
-				printf(RED"Error:\nYour values must be numeric only\n"RESET);
+				printf(RED"Error:\nYour values must be"
+					"numerical and positive only\n"RESET);
 				return (1);
 			}
 			j++;
 		}
-		value = ft_atol(argv[i]);
-		if (value > INT_MAX || value < 0)
-		{
-			printf(RED"Error:\nYour value is higher than a INT\n"RESET);
-			return (1);
-		}
-		i++;
 	}
 	return (0);
 }
 
-t_data	*init_struct(int argc, char **argv)
+static t_data	*init_struct(int argc, char **argv)
 {
 	t_data	*data;
 
@@ -59,54 +71,19 @@ t_data	*init_struct(int argc, char **argv)
 		data->must_eaten = ft_atoi(argv[5]);
 	else
 		data->must_eaten = -1;
-	if (data->nb_philo <= 0 || data->tt_die <= 0 || data->tt_eat <= 0 || data->tt_sleep <= 0)
+	if (data->nb_philo <= 0 || data->tt_die <= 0
+		|| data->tt_eat <= 0 || data->tt_sleep <= 0)
 	{
 		free(data);
 		return (NULL);
 	}
 	data->status = ALIVE;
 	data->full = 0;
-	return(data);
+	return (data);
 }
 
-void	DEBUG_DATA(t_data *data)
+static int	error_init(t_data *data)
 {
-	printf(YELLOW"DEBUG: time start %ld\n"RESET, data->time_start);
-	printf(YELLOW"DEBUG: nb_philo %d\n"RESET, data->nb_philo);
-	printf(YELLOW"DEBUG: tt_die %d\n"RESET, data->tt_die);
-	printf(YELLOW"DEBUG: tt_eat %d\n"RESET, data->tt_eat);
-	printf(YELLOW"DEBUG: tt_sleep %d\n"RESET, data->tt_sleep);
-	printf(YELLOW"DEBUG: must_eaten %d\n"RESET, data->must_eaten);
-	printf(YELLOW"DEBUG: dead %d\n"RESET, data->status);
-}
-
-void	DEBUG_PHILO(t_data *data)
-{
-	printf(YELLOW"\nDEBUG: last_meal_time %ld\n"RESET, data->philo->last_meal_time);
-	printf(YELLOW"DEBUG: meals_eaten %d\n"RESET, data->philo->meals_eaten);
-	for (int i = 0; i < data->nb_philo; i++)
-		printf(YELLOW"DEBUG: ID %p\n"RESET, &data->philo[i].thread);
-}
-
-int	main(int argc, char **argv)
-{
-	t_data	*data;
-
-	if (check_args(argc, argv))
-		return (1);
-	if (!(argc == 5 || argc == 6))
-	{
-		printf(RED"Error:\nUsage : ./philo [number_of_philosophers] [time_to_die]"
-			" [time_to_eat] [time_to_sleep]"
-			" [# number_of_times_each_philosopher_must_eat]\n"RESET);
-		return (1);
-	}
-	data = init_struct(argc, argv);
-	if (!data)
-	{
-		printf(RED"Error:\nWrong arguments\n"RESET);
-		return (1);
-	}
 	if (init_values(data))
 	{
 		free_ressources(data);
@@ -118,5 +95,29 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	free_ressources(data);
+	return (0);
+}
+
+int	main(int argc, char **argv)
+{
+	t_data	*data;
+
+	if (check_args(argc, argv) || check_value(argc, argv))
+		return (1);
+	if (!(argc == 5 || argc == 6))
+	{
+		printf(RED"Error:\nUsage : ./philo [number_of_philosophers] "
+			"[time_to_die] [time_to_eat] [time_to_sleep]"
+			" [# number_of_times_each_philosopher_must_eat]\n"RESET);
+		return (1);
+	}
+	data = init_struct(argc, argv);
+	if (!data)
+	{
+		printf(RED"Error:\nWrong arguments\n"RESET);
+		return (1);
+	}
+	if (error_init(data))
+		return (1);
 	return (0);
 }

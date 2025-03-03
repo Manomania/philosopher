@@ -48,20 +48,20 @@ typedef enum e_padlock
 {
 	LOCK,
 	UNLOCK,
-}	e_padlock;
+}	t_padlock;
 
 typedef enum e_status
 {
 	ALIVE,
 	DEAD,
 	FULL,
-}	e_status;
+}	t_status;
 
 typedef enum e_hand
 {
 	RIGHT,
 	LEFT,
-}	e_hand;
+}	t_hand;
 
 typedef struct s_data
 {
@@ -69,7 +69,7 @@ typedef struct s_data
 	pthread_mutex_t	full_lock;
 	pthread_mutex_t	death_lock;
 	pthread_mutex_t	print_lock;
-	e_status		status;
+	t_status		status;
 	t_philo			*philo;
 	unsigned long	time_start;
 	int				nb_philo;
@@ -89,39 +89,39 @@ typedef struct s_philo
 	int				id;
 	int				meals_eaten;
 	int				forks[2];
-	bool			available;
 }					t_philo;
-
-
 
 /*******************************************************************************
 *                             Function Prototypes                              *
 *******************************************************************************/
+
+// alone.c
+void			philo_alone(t_philo *philo);
+
+// eating.c
+int				philo_eat(t_philo *philo);
+
+// init.c
+int				init_values(t_data *data);
+int				init_pthread_philo(t_data *data);
+
+// monitoring.c
+int				get_status(t_data *data);
+void			*monitoring(void *arg);
+
+// mutex.c
+int				handle_mutex(pthread_mutex_t *mutex, t_padlock action);
+int				handle_fork_mutex(t_philo *philo, t_hand h, t_padlock a);
+
+// threads.c
+void			free_ressources(t_data *data);
+void			philo_print(char *msg, t_philo *philo);
+void			philo_time(int duration);
+void			*routine(void *arg);
 
 // utils.c
 int				ft_atoi(const char *str);
 long			ft_atol(const char *str);
 size_t			ft_strlen(char *str);
 unsigned long	ft_time(void);
-
-// init.c
-int				init_values(t_data *data);
-int				init_pthread_philo(t_data *data);
-
-// threads.c
-void			*routine(void *arg);
-void			free_ressources(t_data *data);
-
-// mutex.c
-int				handle_mutex(pthread_mutex_t *mutex, e_padlock action);
-int	handle_fork_mutex(t_philo *philo, e_hand hand, e_padlock action);
-int	handle_forks(t_philo *philo, e_padlock action);
-
-int	increase_meal(t_philo *philo);
-int	increase_full(t_philo *philo);
-void	philo_print(char *msg, t_philo *philo);
-int	set_status(t_data *data);
-unsigned long	set_last_meal(t_philo *philo);
-int	get_status(t_data *data);
-
 #endif

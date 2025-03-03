@@ -1,6 +1,8 @@
 SRC_F				=	main \
-						mutex \
-						utils \
+						alone \
 						init \
+						monitoring \
+						eating \
+						mutex \
 						threads \
-						blabla
+						utils
